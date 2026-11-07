@@ -17,7 +17,14 @@ def preparar_base():
     if os.getenv("AUTO_SEED") != "1":
         return "omitido"
     import seed
-    seed.main(reset=False)
+    from sqlalchemy import create_engine
+    eng = create_engine(core.db_url(), pool_pre_ping=True, connect_args={"connect_timeout": 10} if core.db_url().startswith("postgresql") else {})
+    try:
+        if seed.base_lista(eng):          # caso normal: ya hay datos → no se toca nada
+            return "lista"
+    finally:
+        eng.dispose()
+    seed.main(reset=False)                # primera vez: crea tablas y datos
     return "ok"
 
 

@@ -41,18 +41,38 @@ def jitter(lat, lon, km=2.5):
 
 
 def migrar(engine):
-    """Migración no destructiva de una BD existente: amplía columnas, cifra teléfonos en claro y crea usuarios."""
+    """Migración no destructiva y barata: solo toca lo que falta (sin bloqueos si ya está al día)."""
     with engine.begin() as conn:
         if engine.dialect.name == "postgresql":
+            conn.execute(text("SET LOCAL lock_timeout = '5s'"))     # nunca esperar indefinidamente un bloqueo
             for t_ in ("adultos", "cuidadores"):
-                conn.execute(text(f"ALTER TABLE {t_} ALTER COLUMN telefono TYPE VARCHAR(255)"))
+                largo = conn.execute(text(
+                    "SELECT character_maximum_length FROM information_schema.columns "
+                    "WHERE table_name = :t AND column_name = 'telefono'"), {"t": t_}).scalar()
+                if largo is not None and largo < 255:
+                    conn.execute(text(f"ALTER TABLE {t_} ALTER COLUMN telefono TYPE VARCHAR(255)"))
         for t_ in ("adultos", "cuidadores"):
             tb = metadata.tables[t_]
-            for r in conn.execute(select(tb.c.id, tb.c.telefono)).all():
-                if r.telefono and not r.telefono.startswith("enc:"):
+            pend = conn.execute(select(tb.c.id, tb.c.telefono).where(~tb.c.telefono.like("enc:%"))).all()
+            for r in pend:
+                if r.telefono:
                     conn.execute(tb.update().where(tb.c.id == r.id).values(telefono=seg.cifrar(r.telefono)))
     crear_usuarios(engine)
     usuarios_equipo(engine)
+
+
+def base_lista(engine) -> bool:
+    """True si ya hay datos y las cuentas del equipo existen (arranque rápido, sin tocar el esquema)."""
+    try:
+        with engine.connect() as conn:
+            if not conn.execute(select(func.count()).select_from(metadata.tables["adultos"])).scalar():
+                return False
+            u = metadata.tables["usuarios"]
+            existentes = {r[0] for r in conn.execute(select(u.c.username))}
+        esperados = {usr for usr, _, var, pw in EQUIPO if os.getenv(var) or (os.getenv("APP_ENV") != "produccion" and pw)}
+        return esperados <= existentes
+    except Exception:
+        return False
 
 
 EQUIPO = [  # usuario (minúsculas), nombre completo, variable de entorno con su contraseña, contraseña local de respaldo
