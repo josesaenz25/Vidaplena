@@ -1,7 +1,7 @@
 streamlit>=1.40,<1.50
 pandas
 numpy
-sqlalchemy>=2.0
+sqlalchemy>=2.0,<2.1
 psycopg2-binary
 cryptography
 plotly

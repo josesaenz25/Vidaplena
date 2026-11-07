@@ -39,6 +39,12 @@ _cargar_env()
 def db_url() -> str:
     url = os.getenv("DATABASE_URL")
     if url:
+        url = url.strip()
+        # Neon/Render entregan "postgresql://..."; SQLAlchemy 2.1+ lo asocia a otro driver (psycopg 3).
+        # Se fuerza psycopg2, que es el que instalamos.
+        for prefijo in ("postgres://", "postgresql://"):
+            if url.startswith(prefijo):
+                url = "postgresql+psycopg2://" + url[len(prefijo):]
         return url
     if os.getenv("DB_PASSWORD"):
         return "postgresql+psycopg2://{u}:{p}@{h}:{pt}/{n}".format(
