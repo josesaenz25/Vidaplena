@@ -1,0 +1,8 @@
+.env
+credenciales_demo.txt
+backups/
+__pycache__/
+*.pyc
+*.db
+.streamlit/secrets.toml
+*.sqlite

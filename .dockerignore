@@ -1,0 +1,11 @@
+.env
+.git
+.gitignore
+__pycache__/
+*.pyc
+tests/
+backups/
+*.sqlite
+*.db
+credenciales_demo.txt
+.streamlit/secrets.toml
