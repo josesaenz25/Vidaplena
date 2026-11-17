@@ -6,7 +6,7 @@ import random
 import streamlit as st
 
 from core import (ESPECIALIDADES, adulto_activo, badge, estrellas, insert_row,
-                  kpi_row, load, page_header, with_alcaldia)
+                  kpi_row, load, page_header, selector_alcaldia, TODA, with_alcaldia)
 
 ESP_SERVICIO = {"Geriatría": "Apoyo en actividades diarias", "Enfermería": "Enfermería a domicilio",
                 "Fisioterapia": "Fisioterapia", "Cuidado de demencia": "Cuidado de demencia",
@@ -20,14 +20,14 @@ tab1, tab2 = st.tabs(["Catálogo", "Registrar cuidador"])
 
 with tab1:
     f1, f2, f3, f4 = st.columns([1.3, 1.3, 1, 1])
-    alc = f1.selectbox("Alcaldía", ["Todas"] + sorted(cu.alcaldia.unique()))
+    alc = selector_alcaldia(sorted(cu.alcaldia.unique()), "_w_alc_cu")
     esp = f2.selectbox("Especialidad", ["Todas"] + ESPECIALIDADES)
     cal = f3.slider("Calificación mínima", 3.0, 5.0, 3.5, 0.1)
     solo = f4.toggle("Solo disponibles", value=True)
     q = st.text_input("Buscar cuidador", placeholder="Nombre…")
 
     d = cu[cu.calificacion >= cal]
-    if alc != "Todas": d = d[d.alcaldia == alc]
+    if alc != TODA: d = d[d.alcaldia == alc]
     if esp != "Todas": d = d[d.especialidad == esp]
     if solo: d = d[d.disponible]
     if q: d = d[d.nombre.str.contains(q, case=False)]

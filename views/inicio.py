@@ -2,6 +2,7 @@ import seguridad as _seg
 _seg.requiere("inicio")
 import streamlit as st
 
+import poblacion
 from core import BANNER, ESTATUS_ACTIVOS, NAVY, horas_respuesta, kpi_row, load
 
 if BANNER.exists():
@@ -29,6 +30,12 @@ kpi_row([
     ("Solicitudes", f"{len(so):,}", f"{len(activas)} activas", "amber"),
     ("Respuesta media", (f"{horas_respuesta(so).mean():.1f} h" if len(so) and horas_respuesta(so).notna().any() else "—"), "Solicitud → asignación", "green"),
 ])
+
+if _seg.rol() == "coordinacion":
+    st.markdown(f"<div class='vp-card'>🏙️ <b>CDMX:</b> alrededor de <b>{poblacion.TOTAL_60 / 1e6:.1f} millones</b> de personas de 60+ años "
+                f"(estimación). Mayor número: {', '.join(poblacion.TOP_NUMERO)}. Mayor proporción de adultos mayores: "
+                f"{', '.join(poblacion.TOP_PROPORCION)}.<br><small>Fuente: {poblacion.FUENTE} Detalle en Observatorio.</small></div>",
+                unsafe_allow_html=True)
 
 st.write("")
 st.markdown("#### Cómo funciona el sistema")

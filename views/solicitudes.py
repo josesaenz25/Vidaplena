@@ -5,7 +5,7 @@ from datetime import datetime
 import streamlit as st
 
 from core import (ESTATUS, ESTATUS_ACTIVOS, PRIORIDADES, SERVICIOS_SOL, insert_row, kpi_row, load,
-                  page_header, solicitudes_full, tabla, update_row)
+                  page_header, selector_alcaldia, solicitudes_full, tabla, TODA, update_row, enlaces_rapidos)
 
 page_header("Solicitudes", "Bandeja de solicitudes de cuidado: creación, asignación y seguimiento", "📝")
 s = solicitudes_full()
@@ -31,9 +31,10 @@ with tab1:
     f1, f2, f3 = st.columns(3)
     est = f1.multiselect("Estatus", ESTATUS, default=ESTATUS_ACTIVOS)
     pri = f2.multiselect("Prioridad", PRIORIDADES, default=PRIORIDADES)
-    alc = f3.selectbox("Alcaldía", ["Todas"] + sorted(s.alcaldia.dropna().unique()))
+    with f3:
+        alc = selector_alcaldia(sorted(s.alcaldia.dropna().unique()), "_w_alc_sol")
     d = s[s.estatus.isin(est) & s.prioridad.isin(pri)]
-    if alc != "Todas":
+    if alc != TODA:
         d = d[d.alcaldia == alc]
     t = d.sort_values("fecha_solicitud", ascending=False)[
         ["id", "fecha_solicitud", "adulto", "alcaldia", "tipo_servicio", "prioridad", "estatus", "cuidador"]]
@@ -86,3 +87,8 @@ if tab3 is not None:
                   update_row("solicitudes", sid, **vals)
                   st.success("Solicitud actualizada.")
                   st.rerun()
+
+enlaces_rapidos([("matching", "views/matching.py", "Matching Inteligente", "🤝"),
+                 ("cuidadores", "views/cuidadores.py", "Cuidadores", "👥"),
+                 ("mapa_interactivo", "views/mapa_interactivo.py", "Mapa Interactivo", "🗺️"),
+                 ("observatorio", "views/observatorio.py", "Observatorio", "🔎")])

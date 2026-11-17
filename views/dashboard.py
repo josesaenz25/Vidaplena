@@ -7,8 +7,9 @@ from datetime import datetime, timedelta
 import plotly.express as px
 import streamlit as st
 
-from core import (BLUE, ESTATUS_ACTIVOS, TEAL, horas_respuesta, kpi_row, load, metadata, page_header,
-                  solicitudes_full, style_fig, ultima_lectura)
+import poblacion
+from core import (BLUE, ESTATUS_ACTIVOS, TEAL, enlaces_rapidos, horas_respuesta, kpi_row, load, metadata,
+                  page_header, solicitudes_full, style_fig, tabla, ultima_lectura, with_alcaldia)
 
 page_header("Dashboard Ejecutivo", "Indicadores clave del programa para la toma de decisiones", "📊")
 s = solicitudes_full()
@@ -49,6 +50,13 @@ c4.plotly_chart(style_fig(px.bar(cond, x="n", y="tipo_servicio", orientation="h"
                                  color_discrete_sequence=[BLUE]).update_layout(xaxis_title="Solicitudes", yaxis_title="")),
                 use_container_width=True)
 
+st.markdown("#### Cobertura frente a la población de 60+ por alcaldía")
+cob = poblacion.con_cobertura(with_alcaldia(ad).groupby("alcaldia").size()).sort_values("por_10mil")
+st.plotly_chart(style_fig(px.bar(cob, x="por_10mil", y="alcaldia", orientation="h", color_discrete_sequence=[BLUE],
+                                 title="Adultos registrados por cada 10,000 personas de 60+ (estimación)")
+                          .update_layout(xaxis_title="Registrados por 10,000", yaxis_title="")), use_container_width=True)
+st.caption(f"Total estimado de 60+ en la CDMX: {poblacion.TOTAL_60:,}. Fuente: {poblacion.FUENTE}")
+
 pend = int((s.estatus == "Pendiente").sum())
 alta = int(((s.prioridad == "Alta") & s.estatus.isin(ESTATUS_ACTIVOS)).sum())
 st.markdown("#### Resumen ejecutivo")
@@ -56,6 +64,11 @@ st.info(f"• Se atiende al **{atendidos / len(ad):.0%}** de los adultos mayores
         f"• Hay **{pend}** solicitudes pendientes y **{alta}** activas con prioridad alta.\n\n"
         f"• **{alertas}** adultos mayores tienen su última lectura de salud fuera de rango y requieren seguimiento.\n\n"
         f"• La demanda de los últimos 30 días {'subió' if delta >= 0 else 'bajó'} {abs(delta)} solicitudes frente al periodo previo.")
+
+enlaces_rapidos([("observatorio", "views/observatorio.py", "Observatorio", "🔎"),
+                 ("mapa_interactivo", "views/mapa_interactivo.py", "Mapa Interactivo", "🗺️"),
+                 ("solicitudes", "views/solicitudes.py", "Solicitudes", "📝"),
+                 ("salud", "views/salud.py", "Salud", "❤️")])
 
 buf = io.BytesIO()
 with zipfile.ZipFile(buf, "w") as z:

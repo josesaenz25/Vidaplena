@@ -5,8 +5,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from core import (BLUE, ESTATUS_ACTIVOS, TEAL, horas_respuesta, kpi_row, load, page_header,
-                  style_fig, with_alcaldia)
+import poblacion
+from core import (BLUE, ESTATUS_ACTIVOS, TEAL, TODA, enlaces_rapidos, foco_alcaldia, horas_respuesta,
+                  kpi_row, load, page_header, style_fig, tabla, with_alcaldia)
 
 page_header("Observatorio de Datos", "Estadísticas e indicadores para identificar necesidades y mejorar los programas", "🔎")
 ad = with_alcaldia(load("adultos"))
@@ -14,7 +15,12 @@ cu = with_alcaldia(load("cuidadores"))
 so = load("solicitudes")
 
 todas = sorted(ad.alcaldia.unique())
-sel = st.multiselect("Filtrar por alcaldía", todas, default=todas)
+_foco = foco_alcaldia()
+sel = st.multiselect("Filtrar por alcaldía", todas, default=[_foco] if _foco in todas else todas)
+if len(sel) == 1:
+    st.session_state["alc_foco"] = sel[0]
+elif len(sel) == len(todas):
+    st.session_state["alc_foco"] = TODA
 ad = ad[ad.alcaldia.isin(sel)]
 cu = cu[cu.alcaldia.isin(sel)]
 so = so[so.adulto_id.isin(ad.id)]
@@ -64,6 +70,32 @@ mes = so.set_index("fecha_solicitud").resample("MS").size().reset_index(name="So
 st.plotly_chart(style_fig(px.line(mes, x="fecha_solicitud", y="Solicitudes", markers=True,
                                   title="Tendencia mensual de solicitudes").update_layout(xaxis_title="")),
                 use_container_width=True)
+
+st.markdown("#### Contexto demográfico: población de 60+ en la CDMX")
+ref = poblacion.con_cobertura(with_alcaldia(load("adultos")).groupby("alcaldia").size())
+ref_sel = ref[ref.alcaldia.isin(sel)]
+k1, k2, k3 = st.columns(3)
+k1.metric("60+ estimados (alcaldías elegidas)", f"{int(ref_sel.pob60_est.sum()):,}")
+k2.metric("Registrados en VidaPlena", f"{int(ref_sel.registrados.sum()):,}")
+k3.metric("Cobertura por 10,000 personas 60+", f"{ref_sel.registrados.sum() / ref_sel.pob60_est.sum() * 10000:.1f}")
+d1, d2 = st.columns(2)
+d1.plotly_chart(style_fig(px.bar(ref_sel.sort_values("pob60_est"), x="pob60_est", y="alcaldia", orientation="h",
+                                 title="Población 60+ estimada por alcaldía", color_discrete_sequence=[BLUE])
+                          .update_layout(xaxis_title="Personas (aprox.)", yaxis_title="")), use_container_width=True)
+d2.plotly_chart(style_fig(px.bar(ref_sel.sort_values("pct65_2020"), x="pct65_2020", y="alcaldia", orientation="h",
+                                 title="Proporción de 65+ (Censo 2020, INEGI)", color_discrete_sequence=[TEAL])
+                          .update_layout(xaxis_title="% de la población", yaxis_title="")), use_container_width=True)
+t = ref_sel.sort_values("pob60_est", ascending=False)[
+    ["alcaldia", "pob60_est", "rank_numero", "pob_total_2020", "pct65_2020", "rank_proporcion", "registrados", "por_10mil"]]
+t.columns = ["Alcaldía", "60+ estimados", "Lugar por número", "Población total 2020", "% 65+ (2020)",
+             "Lugar por proporción", "Registrados en VidaPlena", "Registrados por 10,000 60+"]
+tabla(t)
+st.caption(f"Fuente: {poblacion.FUENTE} Población total y % de 65+: INEGI, Panorama sociodemográfico de Ciudad de México 2020. "
+           f"Total CDMX (60+ estimado): {poblacion.TOTAL_60:,}.")
+enlaces_rapidos([("mapa_interactivo", "views/mapa_interactivo.py", "Ver en el mapa", "🗺️"),
+                 ("cuidadores", "views/cuidadores.py", "Cuidadores", "👥"),
+                 ("solicitudes", "views/solicitudes.py", "Solicitudes", "📝"),
+                 ("dashboard", "views/dashboard.py", "Dashboard Ejecutivo", "📊")])
 
 top = g.iloc[-1]
 peor = brecha.iloc[0]

@@ -5,8 +5,9 @@ import streamlit as st
 from folium.plugins import HeatMap, MarkerCluster
 from streamlit_folium import st_folium
 
-from core import (ESTATUS_ACTIVOS, TIPO_COLOR, TIPO_ICONO, kpi_row, load, mapa_base, page_header,
-                  solicitudes_full, with_alcaldia)
+import poblacion
+from core import (ESTATUS_ACTIVOS, TIPO_COLOR, TIPO_ICONO, TODA, enlaces_rapidos, kpi_row, load, mapa_base,
+                  page_header, selector_alcaldia, solicitudes_full, with_alcaldia)
 
 page_header("Mapa Interactivo", "Adultos mayores, cuidadores, servicios y demanda activa sobre la CDMX", "🗺️")
 ad = with_alcaldia(load("adultos"))
@@ -14,7 +15,7 @@ cu = with_alcaldia(load("cuidadores"))
 sv = with_alcaldia(load("servicios"))
 so = solicitudes_full()
 
-alc = st.selectbox("Alcaldía", ["Toda la CDMX"] + sorted(ad.alcaldia.unique()))
+alc = selector_alcaldia(sorted(ad.alcaldia.unique()), "_w_alc_mapa")
 t1, t2, t3, t4 = st.columns(4)
 v_ad = t1.toggle("Adultos mayores", True)
 v_cu = t2.toggle("Cuidadores", True)
@@ -25,7 +26,10 @@ if alc != "Toda la CDMX":
     ad, cu, sv = ad[ad.alcaldia == alc], cu[cu.alcaldia == alc], sv[sv.alcaldia == alc]
     so = so[so.alcaldia == alc]
 act = so[so.estatus.isin(ESTATUS_ACTIVOS)]
-kpi_row([("Adultos", len(ad), "En el área", "blue"), ("Cuidadores", len(cu), f"{int(cu.disponible.sum())} disponibles", "teal"),
+_ref = poblacion.referencia().set_index("alcaldia")
+_p60 = int(_ref.pob60_est.sum()) if alc == TODA else int(_ref.loc[alc, "pob60_est"]) if alc in _ref.index else 0
+kpi_row([("60+ estimados", f"{_p60:,}", "Población de referencia (aprox.)", "blue"),
+         ("Adultos registrados", len(ad), f"{len(ad) / _p60 * 10000:.1f} por 10,000 de 60+" if _p60 else "En el área", "teal"), ("Cuidadores", len(cu), f"{int(cu.disponible.sum())} disponibles", "teal"),
          ("Servicios", len(sv), "Salud y apoyo", "green"), ("Demanda activa", len(act), "Solicitudes abiertas", "amber")])
 st.write("")
 
@@ -51,3 +55,7 @@ if v_sv:
 folium.LayerControl().add_to(m)
 st_folium(m, height=600, use_container_width=True, returned_objects=[])
 st.caption("Cuidadores en verde = disponibles; en gris = ocupados. El mapa de calor muestra dónde está la demanda activa.")
+enlaces_rapidos([("observatorio", "views/observatorio.py", "Observatorio", "🔎"),
+                 ("cuidadores", "views/cuidadores.py", "Cuidadores", "👥"),
+                 ("solicitudes", "views/solicitudes.py", "Solicitudes", "📝"),
+                 ("dashboard", "views/dashboard.py", "Dashboard Ejecutivo", "📊")])
