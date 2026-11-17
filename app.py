@@ -1,5 +1,3 @@
-import os
-
 import streamlit as st
 
 import core
@@ -11,33 +9,7 @@ import seguridad as seg
 st.set_page_config(page_title="VidaPlena CDMX", page_icon="🏥", layout="wide", initial_sidebar_state="expanded")
 inject_css()
 
-@st.cache_resource(show_spinner="Preparando la base de datos (solo la primera vez, ~1 min)…")
-def preparar_base():
-    """En la nube no hay terminal: con AUTO_SEED=1 se crean tablas y datos sintéticos si faltan (idempotente)."""
-    if os.getenv("AUTO_SEED") != "1":
-        return "omitido"
-    import seed
-    from sqlalchemy import create_engine
-    eng = create_engine(core.db_url(), pool_pre_ping=True, connect_args={"connect_timeout": 10} if core.db_url().startswith("postgresql") else {})
-    try:
-        if seed.base_lista(eng):          # caso normal: ya hay datos → no se toca nada
-            return "lista"
-    finally:
-        eng.dispose()
-    seed.main(reset=False)                # primera vez: crea tablas y datos
-    return "ok"
-
-
 # ---- Base de datos disponible y esquema al día ----
-try:
-    preparar_base()
-except core.ConfigError as e:
-    st.error(str(e))
-    st.stop()
-except Exception as e:
-    st.error("No se pudo preparar la base de datos.")
-    st.exception(e)
-    st.stop()
 try:
     adultos = load("adultos")
     load("usuarios")

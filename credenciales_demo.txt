@@ -1,0 +1,6 @@
+Credenciales DEMO (datos sintéticos). Cámbialas desde 'Mis derechos'. NO subir a git.
+coordinacion   Vp-4lFRlJUEYzH7        rol=coordinacion
+cuidador1      Vpkd5c0WooIrQC7        rol=cuidador cuidador_id=2
+cuidador2      VpFB6WwxP3y-ge7        rol=cuidador cuidador_id=3
+familiar1      VpBv6_Rf8mFsmh7        rol=familiar adulto_id=1
+familiar2      VptQdFdqdYDKa57        rol=familiar adulto_id=2

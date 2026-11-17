@@ -4,5 +4,3 @@ backups/
 __pycache__/
 *.pyc
 *.db
-.streamlit/secrets.toml
-*.sqlite

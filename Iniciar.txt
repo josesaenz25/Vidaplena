@@ -1,0 +1,21 @@
+docker start vidaplenacdmx-postgres-1
+
+
+docker ps --filter "name=vidaplenacdmx-postgres-1"
+
+
+cd D:\vidaplena_v2\vidaplena
+python seed.py --reset
+
+
+streamlit run app.py
+
+++++++++++++++++++++++++++++++++++++++++++
+
+Neon:
+
+
+postgresql://neondb_owner:npg_Uph4Cqe9ktoV@ep-shiny-flower-bdx2e35q-pooler.c-8.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+llave:
+TEsWpZuPp552cMPHUaVPhEb8wXvcEr42OTgrsp3QDNM=
