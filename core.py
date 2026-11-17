@@ -441,3 +441,35 @@ def mapa_base(lat=19.40, lon=-99.14, zoom=11):
 def estrellas(x: float) -> str:
     n = int(round(x))
     return "★" * n + "☆" * (5 - n)
+
+
+# ------------------------------------------------------------------
+# Enlace entre páginas: alcaldía en foco compartida + accesos rápidos
+# ------------------------------------------------------------------
+TODA = "Toda la CDMX"
+
+
+def foco_alcaldia() -> str:
+    return st.session_state.get("alc_foco", TODA)
+
+
+def selector_alcaldia(opciones, key, label="Alcaldía"):
+    """Selectbox que recuerda la alcaldía elegida al cambiar de página del menú."""
+    opciones = [TODA] + list(opciones)
+    foco = foco_alcaldia()
+    st.session_state[key] = foco if foco in opciones else TODA     # re-sincroniza al volver a la página
+
+    def _guardar():
+        st.session_state["alc_foco"] = st.session_state[key]
+    return st.selectbox(label, opciones, key=key, on_change=_guardar)
+
+
+def enlaces_rapidos(items):
+    """items: [(pagina_id, ruta, etiqueta, icono)] → solo los permitidos para el rol."""
+    from seguridad import PAGINAS_POR_ROL, rol
+    ok = [i for i in items if i[0] in PAGINAS_POR_ROL[rol()]]
+    if not ok:
+        return
+    st.markdown("**Ir a:**")
+    for col, (_, ruta, et, ic) in zip(st.columns(len(ok)), ok):
+        col.page_link(ruta, label=et, icon=ic)

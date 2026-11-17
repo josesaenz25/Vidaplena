@@ -19,15 +19,15 @@ from core import (COND_ESP, CONDICIONES, ESPECIALIDADES, ESTATUS,
                   db_url, metadata)
 import seguridad as seg
 
-ALCALDIAS = [  # nombre, lat, lon, peso relativo de población adulta mayor
-    ("Álvaro Obregón", 19.3587, -99.2036, 8), ("Azcapotzalco", 19.4869, -99.1844, 5),
-    ("Benito Juárez", 19.3727, -99.1580, 6), ("Coyoacán", 19.3467, -99.1617, 7),
-    ("Cuajimalpa", 19.3570, -99.2940, 2), ("Cuauhtémoc", 19.4326, -99.1332, 7),
-    ("Gustavo A. Madero", 19.4833, -99.1130, 12), ("Iztacalco", 19.3950, -99.0970, 4),
-    ("Iztapalapa", 19.3574, -99.0670, 16), ("La Magdalena Contreras", 19.3000, -99.2400, 2),
-    ("Miguel Hidalgo", 19.4330, -99.2000, 5), ("Milpa Alta", 19.1920, -99.0230, 1.5),
-    ("Tláhuac", 19.2870, -99.0050, 4), ("Tlalpan", 19.2900, -99.1670, 7),
-    ("Venustiano Carranza", 19.4430, -99.1090, 5), ("Xochimilco", 19.2570, -99.1050, 4),
+ALCALDIAS = [  # nombre, lat, lon, peso = población 60+ estimada (miles), ver poblacion.py
+    ("Álvaro Obregón", 19.3587, -99.2036, 14.5), ("Azcapotzalco", 19.4869, -99.1844, 10),
+    ("Benito Juárez", 19.3727, -99.1580, 7), ("Coyoacán", 19.3467, -99.1617, 16.5),
+    ("Cuajimalpa", 19.3570, -99.2940, 3.4), ("Cuauhtémoc", 19.4326, -99.1332, 10.5),
+    ("Gustavo A. Madero", 19.4833, -99.1130, 22), ("Iztacalco", 19.3950, -99.0970, 8.2),
+    ("Iztapalapa", 19.3574, -99.0670, 28), ("La Magdalena Contreras", 19.3000, -99.2400, 4.2),
+    ("Miguel Hidalgo", 19.4330, -99.2000, 8.8), ("Milpa Alta", 19.1920, -99.0230, 2),
+    ("Tláhuac", 19.2870, -99.0050, 6.5), ("Tlalpan", 19.2900, -99.1670, 13.5),
+    ("Venustiano Carranza", 19.4430, -99.1090, 9.2), ("Xochimilco", 19.2570, -99.1050, 7.8),
 ]
 
 rng = random.Random(42)
