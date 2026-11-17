@@ -191,7 +191,7 @@ def cambiar_password(uid: int, actual: str, nueva: str) -> str | None:
 
 # ---- control de acceso por rol (mínimo privilegio)
 PAGINAS_POR_ROL = {
-    "coordinacion": {"inicio", "programa", "salud", "solicitudes", "cuidadores", "matching", "mapa_cdmx",
+    "coordinacion": {"inicio", "registro", "programa", "salud", "solicitudes", "cuidadores", "matching", "mapa_cdmx",
                      "observatorio", "mapa_interactivo", "dashboard", "mis_derechos", "gestion_arco",
                      "auditoria", "estado_sistema", "aviso"},
     "familiar": {"inicio", "programa", "salud", "solicitudes", "mapa_cdmx", "mis_derechos", "aviso"},
