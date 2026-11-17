@@ -77,7 +77,7 @@ ref_sel = ref[ref.alcaldia.isin(sel)]
 k1, k2, k3 = st.columns(3)
 k1.metric("60+ estimados (alcaldías elegidas)", f"{int(ref_sel.pob60_est.sum()):,}")
 k2.metric("Registrados en VidaPlena", f"{int(ref_sel.registrados.sum()):,}")
-k3.metric("Cobertura por 10,000 personas 60+", f"{ref_sel.registrados.sum() / ref_sel.pob60_est.sum() * 10000:.1f}")
+k3.metric("Muestra piloto por 10,000 personas 60+", f"{ref_sel.registrados.sum() / ref_sel.pob60_est.sum() * 10000:.1f}")
 d1, d2 = st.columns(2)
 d1.plotly_chart(style_fig(px.bar(ref_sel.sort_values("pob60_est"), x="pob60_est", y="alcaldia", orientation="h",
                                  title="Población 60+ estimada por alcaldía", color_discrete_sequence=[BLUE])

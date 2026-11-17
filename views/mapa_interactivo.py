@@ -29,7 +29,7 @@ act = so[so.estatus.isin(ESTATUS_ACTIVOS)]
 _ref = poblacion.referencia().set_index("alcaldia")
 _p60 = int(_ref.pob60_est.sum()) if alc == TODA else int(_ref.loc[alc, "pob60_est"]) if alc in _ref.index else 0
 kpi_row([("60+ estimados", f"{_p60:,}", "Población de referencia (aprox.)", "blue"),
-         ("Adultos registrados", len(ad), f"{len(ad) / _p60 * 10000:.1f} por 10,000 de 60+" if _p60 else "En el área", "teal"), ("Cuidadores", len(cu), f"{int(cu.disponible.sum())} disponibles", "teal"),
+         ("Adultos del piloto", len(ad), f"{len(ad) / _p60 * 10000:.1f} por 10,000 de 60+" if _p60 else "En el área", "teal"), ("Cuidadores", len(cu), f"{int(cu.disponible.sum())} disponibles", "teal"),
          ("Servicios", len(sv), "Salud y apoyo", "green"), ("Demanda activa", len(act), "Solicitudes abiertas", "amber")])
 st.write("")
 

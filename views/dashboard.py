@@ -50,12 +50,12 @@ c4.plotly_chart(style_fig(px.bar(cond, x="n", y="tipo_servicio", orientation="h"
                                  color_discrete_sequence=[BLUE]).update_layout(xaxis_title="Solicitudes", yaxis_title="")),
                 use_container_width=True)
 
-st.markdown("#### Cobertura frente a la población de 60+ por alcaldía")
+st.markdown("#### Cobertura del piloto frente a la población de 60+ por alcaldía")
 cob = poblacion.con_cobertura(with_alcaldia(ad).groupby("alcaldia").size()).sort_values("por_10mil")
 st.plotly_chart(style_fig(px.bar(cob, x="por_10mil", y="alcaldia", orientation="h", color_discrete_sequence=[BLUE],
-                                 title="Adultos registrados por cada 10,000 personas de 60+ (estimación)")
+                                 title="Muestra piloto: adultos registrados por cada 10,000 personas de 60+")
                           .update_layout(xaxis_title="Registrados por 10,000", yaxis_title="")), use_container_width=True)
-st.caption(f"Total estimado de 60+ en la CDMX: {poblacion.TOTAL_60:,}. Fuente: {poblacion.FUENTE}")
+st.caption(f"VidaPlena opera como piloto con una muestra de {len(ad):,} adultos mayores; no pretende cubrir a toda la población. Total estimado de 60+ en la CDMX: {poblacion.TOTAL_60:,}. Fuente: {poblacion.FUENTE}")
 
 pend = int((s.estatus == "Pendiente").sum())
 alta = int(((s.prioridad == "Alta") & s.estatus.isin(ESTATUS_ACTIVOS)).sum())
