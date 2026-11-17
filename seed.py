@@ -30,6 +30,11 @@ ALCALDIAS = [  # nombre, lat, lon, peso = población 60+ estimada (miles), ver p
     ("Venustiano Carranza", 19.4430, -99.1090, 9.2), ("Xochimilco", 19.2570, -99.1050, 7.8),
 ]
 
+# Tamaño de la muestra piloto (ajustable por variable de entorno)
+N_ADULTOS = int(os.getenv("N_ADULTOS", "1500"))
+N_CUIDADORES = int(os.getenv("N_CUIDADORES", "300"))
+N_SOLICITUDES = int(os.getenv("N_SOLICITUDES", "1200"))
+
 rng = random.Random(42)
 fake = Faker("es_MX")
 Faker.seed(42)
@@ -161,7 +166,7 @@ def main(reset: bool):
 
         # --- Adultos mayores ---
         adultos = []
-        for i in range(1, 201):
+        for i in range(1, N_ADULTOS + 1):
             aid = rng.choices(range(1, 17), weights=pesos)[0]
             _, la, lo = alc_ids[aid]
             lat, lon = jitter(la, lo)
@@ -183,8 +188,8 @@ def main(reset: bool):
 
         # --- Cuidadores ---
         cuid = []
-        for i in range(1, 51):
-            aid = rng.randint(1, 16)
+        for i in range(1, N_CUIDADORES + 1):
+            aid = rng.choices(range(1, 17), weights=pesos)[0]
             _, la, lo = alc_ids[aid]
             lat, lon = jitter(la, lo, 3)
             sexo = rng.choice(["F", "M"])
@@ -204,7 +209,7 @@ def main(reset: bool):
         serv, sid = [], 1
         for aid, (n, la, lo) in alc_ids.items():
             for tipo in TIPOS_SERVICIO:
-                for k in range(rng.randint(1, 2)):
+                for k in range(rng.randint(2, 3)):
                     lat, lon = jitter(la, lo, 3)
                     pref = {"Centro de salud": "Centro de Salud", "Farmacia": "Farmacia",
                             "Programa social": "Programa Social", "Centro de día": "Centro de Día"}[tipo]
@@ -217,7 +222,7 @@ def main(reset: bool):
 
         # --- Solicitudes ---
         sol = []
-        for i in range(1, 201):
+        for i in range(1, N_SOLICITUDES + 1):
             ad = rng.choice(adultos)
             edad_dias = rng.random() * 180
             fecha = now - timedelta(days=edad_dias, hours=rng.uniform(0, 12))
@@ -248,8 +253,8 @@ def main(reset: bool):
                 dia = 76 + (12 if ad["condicion"] == "Hipertensión" else 0) + rng.gauss(0, 6)
                 glu = 92 + (55 if ad["condicion"] == "Diabetes" else 0) + rng.gauss(0, 14)
                 vit.append(dict(
-                    adulto_id=ad["id"], fecha=f, sistolica=int(sis), diastolica=int(dia),
-                    glucosa=int(glu),
+                    adulto_id=ad["id"], fecha=f, sistolica=int(min(220, max(75, sis))),
+                    diastolica=int(min(130, max(45, dia))), glucosa=int(min(400, max(45, glu))),
                     estado_animo=rng.choices(["Bien", "Regular", "Bajo"], weights=[60, 30, 10])[0],
                     actividad_min=rng.randint(0, 60)))
         conn.execute(T["signos_vitales"].insert(), vit)
