@@ -75,7 +75,7 @@ with col_b:
             st.page_link("views/matching.py", label="Buscar cuidador", icon="🤝")
 
 st.write("")
-sem = act[act.fecha >= pd.Timestamp(date.today()) - pd.Timedelta(days=6)]
+sem = act[act.fecha.dt.date >= (pd.Timestamp(date.today()) - pd.Timedelta(days=6)).date()]
 if len(sem):
     g = sem.groupby(sem.fecha.dt.date).completada.mean().mul(100).round(0).reset_index()
     g.columns = ["Fecha", "Cumplimiento (%)"]
