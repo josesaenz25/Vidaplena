@@ -64,6 +64,8 @@ with c2:
                 st.page_link("views/observatorio.py", label="Observatorio de Datos", icon="🔎")
             if "matching" in _seg.PAGINAS_POR_ROL[_seg.rol()]:
                 st.page_link("views/matching.py", label="Matching Inteligente", icon="🤝")
+            if "registro" in _seg.PAGINAS_POR_ROL[_seg.rol()]:
+                st.page_link("views/registro.py", label="Registrar personas", icon="➕")
         with f2:
             if "solicitudes" in _seg.PAGINAS_POR_ROL[_seg.rol()]:
                 st.page_link("views/solicitudes.py", label="Solicitudes", icon="📝")
